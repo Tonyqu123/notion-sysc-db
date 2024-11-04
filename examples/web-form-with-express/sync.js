@@ -121,15 +121,6 @@ const insertToNotion = async (data) => {
               },
             ],
           },
-          abstract: {
-            rich_text: [
-              {
-                text: {
-                  content: item.abstract || '',
-                },
-              },
-            ],
-          },
           file_path: {
             rich_text: [
               {
@@ -141,6 +132,48 @@ const insertToNotion = async (data) => {
           },
         },
         children: [
+          {
+            object: 'block',
+            type: 'heading_2',
+            heading_2: {
+              rich_text: [
+                {
+                  type: 'text',
+                  text: {
+                    content: '摘要',
+                  },
+                },
+              ],
+            },
+          },
+          {
+            object: 'block',
+            type: 'paragraph',
+            paragraph: {
+              rich_text: [
+                {
+                  type: 'text',
+                  text: {
+                    content: item.abstract || '',
+                  },
+                },
+              ],
+            },
+          },
+          {
+            object: 'block',
+            type: 'heading_2',
+            heading_2: {
+              rich_text: [
+                {
+                  type: 'text',
+                  text: {
+                    content: '大纲',
+                  },
+                },
+              ],
+            },
+          },
           {
             object: 'block',
             type: 'paragraph',
@@ -163,7 +196,6 @@ const insertToNotion = async (data) => {
 
     if (promises.length > 0) {
       await Promise.all(promises);
-      // 考虑 Notion API 的速率限制
       await new Promise(resolve => setTimeout(resolve, 1000));
     }
   }
