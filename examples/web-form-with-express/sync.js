@@ -109,6 +109,22 @@ const insertToNotion = async (data) => {
             ],
           },
         },
+        children: [
+          {
+            object: 'block',
+            type: 'paragraph',
+            paragraph: {
+              rich_text: [
+                {
+                  type: 'text',
+                  text: {
+                    content: item.outline || '',
+                  },
+                },
+              ],
+            },
+          },
+        ],
       }).catch(err => {
         console.error(`插入 Notion 页面失败，ID: ${item.id}`, err)
         // 这里可以记录失败的项以便后续重试
