@@ -72,12 +72,43 @@ const fetchNewData = async (lastSync) => {
   })
 }
 
-// 批量插入数据到 Notion
+// 检查条目是否已存在于 Notion
+const checkExistingEntry = async (filePath) => {
+  try {
+    const response = await notion.databases.query({
+      database_id: process.env.NOTION_DATABASE_ID,
+      filter: {
+        property: "file_path",
+        rich_text: {
+          equals: filePath
+        }
+      }
+    });
+    return response.results.length > 0;
+  } catch (error) {
+    console.error('检查重复条目时出错:', error);
+    return false;
+  }
+}
+
+// 修改后的 insertToNotion 函数
 const insertToNotion = async (data) => {
-  const batchSize = 10
+  const batchSize = 10;
   for (let i = 0; i < data.length; i += batchSize) {
-    const batch = data.slice(i, i + batchSize)
-    const promises = batch.map(item => {
+    const batch = data.slice(i, i + batchSize);
+    
+    // 过滤掉已存在的条目
+    const filteredBatch = [];
+    for (const item of batch) {
+      const exists = await checkExistingEntry(item.file_path);
+      if (!exists) {
+        filteredBatch.push(item);
+      } else {
+        console.log(`跳过已存在的条目: ${item.file_path}`);
+      }
+    }
+
+    const promises = filteredBatch.map(item => {
       return notion.pages.create({
         parent: { database_id: process.env.NOTION_DATABASE_ID },
         properties: {
@@ -126,13 +157,15 @@ const insertToNotion = async (data) => {
           },
         ],
       }).catch(err => {
-        console.error(`插入 Notion 页面失败，ID: ${item.id}`, err)
-        // 这里可以记录失败的项以便后续重试
-      })
-    })
-    await Promise.all(promises)
-    // 考虑 Notion API 的速率限制
-    await new Promise(resolve => setTimeout(resolve, 1000))
+        console.error(`插入 Notion 页面失败，ID: ${item.id}`, err);
+      });
+    });
+
+    if (promises.length > 0) {
+      await Promise.all(promises);
+      // 考虑 Notion API 的速率限制
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
   }
 }
 
