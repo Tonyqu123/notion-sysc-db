@@ -40,8 +40,12 @@
     "build/src/**"
   ],
   "dependencies": {
+    "@notionhq/client": "^2.2.15",
     "@types/node-fetch": "^2.5.10",
-    "node-fetch": "^2.6.1"
+    "dotenv": "^16.4.5",
+    "node-cron": "^3.0.3",
+    "node-fetch": "^2.6.1",
+    "sqlite3": "^5.1.7"
   },
   "devDependencies": {
     "@types/jest": "^28.1.4",
